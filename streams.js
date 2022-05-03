@@ -140,52 +140,58 @@ const getFirstDatas = async () => {
 async function init () {
   $.LoadingOverlay('show');
   // 拿到前五熱門遊戲、實況列表
-  const [topGames, streams] = await getFirstDatas();
-  // 設定標題
-  updateTopic(topGames.data[0].name);
-  // 儲存遊戲 id 
-  gameId = topGames.data[0].id;
-  // 設定導覽列
-  const navButton = document.querySelectorAll('.nav__button');
-  navButton.forEach((button, index) => {
-    button.textContent = topGames.data[index].name;
-    button.setAttribute('data-game-id', topGames.data[index].id);
-  });
-  // 渲染實況列表
-  renderStreams(streams);
+  try {
+    const [topGames, streams] = await getFirstDatas();
+    // 設定標題
+    updateTopic(topGames.data[0].name);
+    // 儲存遊戲 id 
+    gameId = topGames.data[0].id;
+    // 設定導覽列
+    const navButton = document.querySelectorAll('.nav__button');
+    navButton.forEach((button, index) => {
+      button.textContent = topGames.data[index].name;
+      button.setAttribute('data-game-id', topGames.data[index].id);
+    });
+    // 渲染實況列表
+    renderStreams(streams);
 
-  // 無限滾軸設定
-  const observer = new IntersectionObserver(async ([entries]) => {
-    if (entries.isIntersecting && !isProcessing) {
-      // 最後一頁了
-      if (isLastPage) return;
-      $.LoadingOverlay('show');
-      // 先 Lock 住，避免連續觸發
-      isProcessing = true;
-      const streams = await getStreams(gameId, LIMIT, cursor);
-      // 檢查資料，沒資料就插入新元素提示 user
-      if (streams.data.length === 0) {
-        const container = document.querySelector('.main .container');
-        const div = document.createElement('div');
-        div.classList.add('no-more-hint');
-        div.innerText = 'no more';
-        container.appendChild(div);
-        // 更新成最後一頁的狀態
-        isLastPage = true;
+    // 無限滾軸設定
+    const observer = new IntersectionObserver(async ([entries]) => {
+      if (entries.isIntersecting && !isProcessing) {
+        // 最後一頁了
+        if (isLastPage) return;
+        $.LoadingOverlay('show');
+        // 先 Lock 住，避免連續觸發
+        isProcessing = true;
+        const streams = await getStreams(gameId, LIMIT, cursor);
+        // 檢查資料，沒資料就插入新元素提示 user
+        if (streams.data.length === 0) {
+          const container = document.querySelector('.main .container');
+          const div = document.createElement('div');
+          div.classList.add('no-more-hint');
+          div.innerText = 'no more';
+          container.appendChild(div);
+          // 更新成最後一頁的狀態
+          isLastPage = true;
+          // 做完再解除 Lock
+          isProcessing = false;
+          $.LoadingOverlay('hide');
+          return;
+        }
+        // 渲染上去
+        renderStreams(streams);
         // 做完再解除 Lock
         isProcessing = false;
         $.LoadingOverlay('hide');
-        return;
       }
-      // 渲染上去
-      renderStreams(streams);
-      // 做完再解除 Lock
-      isProcessing = false;
-      $.LoadingOverlay('hide');
-    }
-  }, { threshold: 0 });
-  observer.observe(detector);
-  $.LoadingOverlay('hide');
+    }, { threshold: 0 });
+    observer.observe(detector);
+    $.LoadingOverlay('hide');
+  } catch (err) {
+    $.LoadingOverlay('hide');
+    const modal = document.querySelector('.modal');
+    modal.classList.remove('hide');
+  }
 }
 
 init();

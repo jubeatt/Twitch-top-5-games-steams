@@ -14,6 +14,55 @@ img {
   -o-object-position: center;
   object-position: center;
 }
+.hide {
+  display: none;
+}
+/* 錯誤視窗 */
+.modal {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 999;
+}
+
+.modal__inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 85%;
+  max-width: 600px;
+  height: 400px;
+  text-align: center;
+  margin: auto;
+  background-color: white;
+  border-radius: 4px;
+  display: flex;
+}
+.modal__content {
+  margin: auto;
+  font-size: 1.5em;
+  line-height: 2;
+  padding: 20px;
+}
+.modal__link {
+  display: block;
+  background-color: #FFD369;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-top: 30px;
+}
+
+@media screen and (max-width: 768px) {
+  .modal__content {
+    font-size: 1.2em;
+  }
+}
+
 
 .no-more-hint {
   display: block;
